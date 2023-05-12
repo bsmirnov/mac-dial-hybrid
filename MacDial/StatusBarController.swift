@@ -5,6 +5,7 @@ import AppKit
 enum WheelSensitivity: String {
     case low = "low"
     case medium = "medium"
+    case mediumrare = "mediumrare"
     case high = "high"
     case extreme = "extreme"
 }
@@ -17,6 +18,9 @@ enum ScrollDirection: String {
 enum Mode: String {
     case scrolling = "scrolling"
     case playback = "playback"
+    case scrollplaypause = "scrollplaypause"
+    case keyboard = "keyboard"
+    
 }
 
 enum HapticsMode: String {
@@ -78,6 +82,8 @@ extension NSMenu {
         self.addItem(items.separator)
         self.addItem(items.scrollMode)
         self.addItem(items.playbackMode)
+        self.addItem(items.scrollPlayPauseMode)
+        self.addItem(items.keyboardMode)
         self.addItem(items.separator2)
         
         items.wheelSensitivity.submenu = NSMenu.init()
@@ -117,12 +123,15 @@ class StatusBarController
         let separator = NSMenuItem.separator()
         let scrollMode = ControllerOptionItem.init(title: "Scroll mode", mode: .scrolling, controller: ScrollController())
         let playbackMode = ControllerOptionItem.init(title: "Playback mode", mode: .playback, controller: PlaybackController())
+        let scrollPlayPauseMode = ControllerOptionItem.init(title: "Scroll & Pause mode", mode: .scrollplaypause, controller: ScrollPlayPauseController())
+        let keyboardMode = ControllerOptionItem.init(title: "Keyboard (;, `, ') mode", mode: .keyboard, controller: KeyboardController())
         let separator2 = NSMenuItem.separator()
         let wheelSensitivity = NSMenuItem.init(title: "Wheel Sensitivity")
         let wheelSensitivityOptions = [
             MenuOptionItem<WheelSensitivity>.init(title: "Low", option: .low),
             MenuOptionItem<WheelSensitivity>.init(title: "Medium", option: .medium),
             MenuOptionItem<WheelSensitivity>.init(title: "High", option: .high),
+            MenuOptionItem<WheelSensitivity>.init(title: "Medium Rare", option: .mediumrare),
             MenuOptionItem<WheelSensitivity>.init(title: "Extreme", option: .extreme)
         ]
         let scrollDirection = NSMenuItem.init(title: "Scroll Direction")
@@ -146,8 +155,12 @@ class StatusBarController
             {
             case .some("scroll"):
                 return .scrolling
+            case .some("scrollplaypause"):
+                return .scrollplaypause
             case .some("playback"):
                 return .playback
+            case .some("keyboard"):
+                return .keyboard
             default:
                 return .scrolling
             }
@@ -158,6 +171,10 @@ class StatusBarController
             {
             case .playback:
                 UserDefaults.standard.setValue("playback", forKey: "mode")
+            case .scrollplaypause:
+                UserDefaults.standard.setValue("scrollplaypause", forKey: "mode")
+            case .keyboard:
+                UserDefaults.standard.setValue("keyboard", forKey: "mode")
             case .scrolling:
                 UserDefaults.standard.setValue("scroll", forKey: "mode")
             }
@@ -171,6 +188,10 @@ class StatusBarController
             {
             case .playback:
                 return menuItems.playbackMode.controller
+            case .scrollplaypause:
+                return menuItems.scrollPlayPauseMode.controller
+            case .keyboard:
+                return menuItems.keyboardMode.controller
             case .scrolling:
                 return menuItems.scrollMode.controller
             }
@@ -192,6 +213,9 @@ class StatusBarController
                 break
             case .high:
                 dial.wheelSensitivity = 72
+                break
+            case .mediumrare:
+                dial.wheelSensitivity = 250
                 break
             case .extreme:
                 dial.wheelSensitivity = 360
@@ -282,6 +306,14 @@ class StatusBarController
         menuItems.playbackMode.action = #selector(setMode(sender:))
         menuItems.playbackMode.selected = currentMode == .playback;
         
+        menuItems.scrollPlayPauseMode.target = self
+        menuItems.scrollPlayPauseMode.action = #selector(setMode(sender:))
+        menuItems.scrollPlayPauseMode.selected = currentMode == .scrollplaypause;
+        
+        menuItems.keyboardMode.target = self
+        menuItems.keyboardMode.action = #selector(setMode(sender:))
+        menuItems.keyboardMode.selected = currentMode == .keyboard;
+        
         for option in menuItems.wheelSensitivityOptions {
             option.target = self
             option.action = #selector(setSensitivity(sender:))
@@ -354,6 +386,12 @@ class StatusBarController
             else if (menuItems.playbackMode.state == .on) {
                 button.image = #imageLiteral(resourceName: "icon-playback")
             }
+            else if (menuItems.scrollPlayPauseMode.state == .on) {
+                button.image = #imageLiteral(resourceName: "icon-scrollplaypause")
+            }
+            else if (menuItems.keyboardMode.state == .on) {
+                button.image = #imageLiteral(resourceName: "icon-keyboard")
+            }
             
             button.image?.size = NSSize(width: 18, height: 18)
             
@@ -371,6 +409,8 @@ class StatusBarController
         
         menuItems.playbackMode.state = item == menuItems.playbackMode ? .on : .off
         menuItems.scrollMode.state = item == menuItems.scrollMode ? .on : .off
+        menuItems.scrollPlayPauseMode.state = item == menuItems.scrollPlayPauseMode ? .on : .off
+        menuItems.keyboardMode.state = item == menuItems.keyboardMode ? .on : .off
         
         currentMode = item.option
         
