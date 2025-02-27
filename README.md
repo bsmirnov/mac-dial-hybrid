@@ -20,8 +20,25 @@ To change mode, click the Mac Dial icon in the system menu bar.
 
 If you want to app to run at startup you will need to add it yourself to the "login items" for your user.
 
-## Improvements
+## Features
+- [X] Default controllers
+  - [X] Scroll
+  - [X] Playback
+  - [X] Mission
+  - [X] Luminance
+- [X] Custom shortcut controllers
+  - [X] Data storage
+  - [X] Preference UI
+    - [X] Named label
+    - [X] SF icon chooser
 
-* More input modes
-* Change input mode using the dial itself
-* ~~Smarter device discovery (currently tries to open the dial every 50 ms)~~
+## macOS 15 Compatibility
+
+This fork adds compatibility with macOS 15:
+
+1. Updated deployment target to macOS 15.0
+2. Fixed EXC_BAD_ACCESS issue in Hardware.swift disconnect method
+3. Updated hidapi library integration
+4. Ensured all dependencies are compatible with macOS 15
+
+The app supports all features of the Microsoft Surface Dial on macOS 15.
