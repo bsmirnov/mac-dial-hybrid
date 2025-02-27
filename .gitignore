@@ -36,3 +36,7 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# hidapi build
+lib/hidapi/build/
+lib/hidapi/build_x86/
